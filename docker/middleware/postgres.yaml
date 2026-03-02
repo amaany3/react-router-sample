@@ -1,0 +1,33 @@
+services:
+  rrs-postgres:
+    image: postgres:16.6-alpine3.21
+    container_name: rrs-postgres
+    labels:
+      - dev.orbstack.domains=postgres.rrs.local
+    environment:
+      POSTGRES_DB: rrs-local
+      POSTGRES_USER: rrs
+      POSTGRES_PASSWORD: pgpass
+    volumes:
+      - ../../schema.sql:/docker-entrypoint-initdb.d/0.schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rrs -d rrs-local"]
+      interval: 1s
+      timeout: 5s
+      retries: 5
+
+  rrs-prisma-init:
+    image: node:22-alpine
+    container_name: rrs-prisma-init
+    working_dir: /app
+    command: npm run prisma:pull
+    volumes:
+      - ../..:/app
+      - rrs-server-node-modules:/app/node_modules
+    env_file:
+      - ../../.env
+    depends_on:
+      rrs-pnpm-install:
+        condition: service_completed_successfully
+      rrs-postgres:
+        condition: service_healthy

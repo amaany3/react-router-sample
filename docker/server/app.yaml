@@ -1,0 +1,30 @@
+services:
+  app:
+    image: node:22-alpine
+    container_name: rrs-app
+    working_dir: /app
+    command: npm run dev
+    labels:
+      - dev.orbstack.domains=app.rrs.local
+      - dev.orbstack.http-port=5173
+    volumes:
+      - ../..:/app
+      - rrs-server-node-modules:/app/node_modules
+    env_file:
+      - ../../.env
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "-q",
+          "--spider",
+          "http://localhost:3000/api/v1/health/ready",
+        ]
+      interval: 1s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    depends_on:
+      rrs-prisma-init:
+        condition: service_completed_successfully

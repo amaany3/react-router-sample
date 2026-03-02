@@ -1,0 +1,19 @@
+generator client {
+  provider   = "prisma-client"
+  output     = "./app/.server/infra/db/gen"
+  engineType = "client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Tasks {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  title     String   @unique @db.VarChar(128)
+  body      String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamp(6)
+
+  @@map("tasks")
+}

@@ -1,0 +1,23 @@
+name: rrs
+
+include:
+  - middleware/postgres.yaml
+
+  - server/app.yaml
+
+services:
+  rrs-pnpm-install:
+    image: node:22-alpine
+    container_name: rrs-pnpm-install
+    working_dir: /app
+    command: npx pnpm install
+    volumes:
+      - ..:/app
+      - rrs-server-node-modules:/app/node_modules
+
+networks:
+  rrs-network:
+    name: rrs-network
+
+volumes:
+  rrs-server-node-modules:
